@@ -59,6 +59,7 @@ const StudentProfile = () => {
     try {
       // Update the Firestore document with the new values
       await firestore().collection('users').doc(user.uid).update({
+        imageUrl,
         fullname,
         rollno,
       });
@@ -70,7 +71,7 @@ const StudentProfile = () => {
   };
 
   const isValidInput = () => {
-    const fullNamePattern = /^[a-zA-Z\s]*$/;   
+    const fullNamePattern = /^[a-zA-Z\s]*$/;
 
     const isFullNameValid = fullNamePattern.test(fullname);
 
@@ -140,7 +141,7 @@ const StudentProfile = () => {
                   keyboardType="phone-pad"
                   value={rollno}
                   onChangeText={handleRollNoChange}
-                />                
+                />
                 <MaterialCommunityIcons
                   name="id-card"
                   size={30}

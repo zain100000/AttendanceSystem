@@ -54,8 +54,7 @@ const StudentCustomDrawer = props => {
           <View style={styles.profileContainer}>
             <View style={styles.imgContainer}>
               <View style={styles.imgContainer}>
-                <TouchableOpacity
-                  onPress={() => navigation.navigate('Profile')}>
+                <TouchableOpacity>
                   {imageUrl ? (
                     <Image source={{uri: imageUrl}} style={styles.image} />
                   ) : (
