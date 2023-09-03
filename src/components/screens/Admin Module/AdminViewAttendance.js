@@ -1,70 +1,68 @@
 import React, {useState, useEffect} from 'react';
 import {View, Text, StyleSheet, FlatList, TouchableOpacity} from 'react-native';
-import {AsyncStorage}  from '@react-native-async-storage/async-storage';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import '../../../../FirebaseConfig';
 import firestore from '@react-native-firebase/firestore';
+import auth from '@react-native-firebase/auth';
 
 const AdminViewAttendance = ({navigation}) => {
   const [attendance, setAttendance] = useState([]);
   const [approveItem, setApproveItem] = useState(null);
   const [rejectedItem, setRejectedItem] = useState(null);
+  const [isDataFetched, setIsDataFetched] = useState(false);
 
   useEffect(() => {
-    const fetchAttendance = async () => {
-      try {
-        // Attempt to fetch attendance data from AsyncStorage
-        const storedAttendance = await AsyncStorage.getItem('attendance');
+    const fetchData = async () => {
+      const user = auth().currentUser;
+      if (user) {
+        const attendanceRef = firestore().collection('attendance');
 
-        if (storedAttendance !== null) {
-          // If data exists in AsyncStorage, parse it and set it to the state
-          setAttendance(JSON.parse(storedAttendance));
-        } else {
-          // If data does not exist in AsyncStorage, fetch it from Firestore
-          const attendanceRef = firestore().collection('attendance');
-          const presentQuery = attendanceRef
-            .doc('present')
-            .collection('students');
-          const leaveQuery = attendanceRef.doc('leave').collection('students');
+        // Fetch attendance data for 'Present' status
+        const presentData = await attendanceRef
+          .doc('present')
+          .collection('students')
+          .get();
 
-          const presentSnapshot = await presentQuery.get();
-          const leaveSnapshot = await leaveQuery.get();
+        // Fetch attendance data for 'Leave' status
+        const leaveData = await attendanceRef
+          .doc('leave')
+          .collection('students')
+          .get();
 
-          const presentData = presentSnapshot.docs.map(doc => doc.data());
-          const leaveData = leaveSnapshot.docs.map(doc => doc.data());
+        const presentAttendance = presentData.docs.map(doc => doc.data());
+        const leaveAttendance = leaveData.docs.map(doc => doc.data());
 
-          // Combine present and leave data if needed
-          const combinedAttendanceData = [...presentData, ...leaveData];
+        // Combine both sets of attendance data
+        const combinedAttendanceData = [
+          ...presentAttendance,
+          ...leaveAttendance,
+        ];
 
-          // Set the data to the state
-          setAttendance(combinedAttendanceData);
-
-          // Store the data in AsyncStorage for persistence
-          await AsyncStorage.setItem(
-            'attendance',
-            JSON.stringify(combinedAttendanceData),
-          );
-        }
-      } catch (error) {
-        console.error('Error fetching attendance:', error);
+        setAttendance(combinedAttendanceData);
+        setIsDataFetched(true);
       }
     };
-
-    fetchAttendance();
-  }, []);
+    if (!isDataFetched) {
+      fetchData();
+    }
+  }, [isDataFetched]);
 
   const approveLeave = async item => {
     try {
-      // Delete the attendance record from the AdminViewAttendance screen
-      const updatedAttendance = attendance.filter(data => data !== item);
-      setAttendance(updatedAttendance);
+      // Create a Firestore reference for 'approveLeaves'
+      const approveLeavesRef = firestore().collection('approveLeaves');
+
+      // Add the attendanceItem to 'leaves' subcollection
+      const leavesRef = approveLeavesRef.doc('leaves').collection('students');
+      await leavesRef.add(item);
+
+      setAttendance(prevAttendance =>
+        prevAttendance.filter(attendanceItem => attendanceItem !== item),
+      );
 
       // Set the approvedItem in the state
       setApproveItem(item);
-
-      // Add the attendanceItem to the 'approveLeaves' Firestore collection
-      await firestore().collection('approveLeaves').add(item);
     } catch (error) {
       console.error('Error approving leave:', error);
     }
@@ -72,15 +70,19 @@ const AdminViewAttendance = ({navigation}) => {
 
   const rejectLeave = async item => {
     try {
-      // Delete the attendance record from the AdminViewAttendance screen
-      const updatedAttendance = attendance.filter(data => data !== item);
-      setAttendance(updatedAttendance);
+      // Create a Firestore reference for 'rejectLeaves'
+      const rejectLeavesRef = firestore().collection('rejectLeaves');
+
+      // Add the attendanceItem to 'leaves' subcollection
+      const leavesRef = rejectLeavesRef.doc('leaves').collection('students');
+      await leavesRef.add(item);
+
+      setAttendance(prevAttendance =>
+        prevAttendance.filter(attendanceItem => attendanceItem !== item),
+      );
 
       // Set the rejectedItem in the state
       setRejectedItem(item);
-
-      // Add the attendanceItem to the 'rejectLeaves' Firestore collection
-      await firestore().collection('rejectLeaves').add(item);
     } catch (error) {
       console.error('Error rejecting leave:', error);
     }
@@ -109,22 +111,25 @@ const AdminViewAttendance = ({navigation}) => {
                   Status: {item.status}
                 </Text>
                 <Text style={styles.attendanceFields}>
-                  TimeStamp:
-                  {item.timestamp && item.timestamp.toLocaleString()}
+                  Timestamp: {item.timestamp.toDate().toLocaleString()}{' '}
+                  {/* Convert timestamp to a readable date */}
                 </Text>
 
-                <View style={styles.buttonContainer}>
-                  <TouchableOpacity
-                    style={styles.approveButton}
-                    onPress={() => approveLeave(item)}>
-                    <Text style={styles.buttonText}>Approve Leave</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={styles.rejectButton}
-                    onPress={() => rejectLeave(item)}>
-                    <Text style={styles.buttonText}>Reject Leave</Text>
-                  </TouchableOpacity>
-                </View>
+                {/* Conditionally render buttons based on student status */}
+                {item.status === 'Leave' ? (
+                  <View style={styles.buttonContainer}>
+                    <TouchableOpacity
+                      style={styles.approveButton}
+                      onPress={() => approveLeave(item)}>
+                      <Text style={styles.buttonText}>Approve Leave</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={styles.rejectButton}
+                      onPress={() => rejectLeave(item)}>
+                      <Text style={styles.buttonText}>Reject Leave</Text>
+                    </TouchableOpacity>
+                  </View>
+                ) : null}
               </View>
             )}
           />

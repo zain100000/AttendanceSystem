@@ -21,7 +21,7 @@ import storage from '@react-native-firebase/storage';
 const StudentProfile = () => {
   const [imageUrl, setImageUrl] = useState('');
   const authInstance = auth();
-  const [fullname, setfullName] = useState('');
+  const [fullName, setfullName] = useState('');
   const [rollno, setRollNo] = useState('');
 
   const handlePickImage = () => {
@@ -29,8 +29,30 @@ const StudentProfile = () => {
       width: 400,
       height: 400,
       cropping: true,
-    }).then(image => {
-      setImageUrl(image.path);
+    }).then(async image => {
+      const user = authInstance.currentUser;
+      if (user) {
+        try {
+          // Upload the new image to Firebase Storage
+          const storageRef = storage().ref(`users/${user.uid}`);
+          await storageRef.putFile(image.path);
+
+          // Get the updated download URL of the image
+          const url = await storageRef.getDownloadURL();
+
+          // Update the Firestore document with the new image URL
+          await firestore().collection('users').doc(user.uid).update({
+            imageUrl: url,
+          });
+
+          setImageUrl(url);
+          alert('Image updated successfully!');
+        } catch (error) {
+          alert('Error while updating image: ' + error);
+        }
+      } else {
+        // User is not logged in, handle this case if needed
+      }
     });
   };
 
@@ -59,8 +81,7 @@ const StudentProfile = () => {
     try {
       // Update the Firestore document with the new values
       await firestore().collection('users').doc(user.uid).update({
-        imageUrl,
-        fullname,
+        fullName,
         rollno,
       });
 
@@ -73,7 +94,7 @@ const StudentProfile = () => {
   const isValidInput = () => {
     const fullNamePattern = /^[a-zA-Z\s]*$/;
 
-    const isFullNameValid = fullNamePattern.test(fullname);
+    const isFullNameValid = fullNamePattern.test(fullName);
 
     return isFullNameValid;
   };
@@ -82,16 +103,16 @@ const StudentProfile = () => {
     setfullName(value);
   };
   const validateFullname = () => {
-    if (!fullname) {
+    if (!fullName) {
       return '';
     }
     const regex = /^[a-zA-Z\s]*$/;
-    if (!fullname.match(regex)) {
+    if (!fullName.match(regex)) {
       return 'Special Characters Not Allowed';
     }
     return '';
   };
-  const fullnameError = validateFullname();
+  const fullNameError = validateFullname();
 
   const handleRollNoChange = value => {
     setRollNo(value);
@@ -120,11 +141,11 @@ const StudentProfile = () => {
                   style={styles.input}
                   placeholder="Full Name"
                   placeholderTextColor={'black'}
-                  value={fullname}
+                  value={fullName}
                   onChangeText={handleFullnameChange}
                 />
-                {fullnameError ? (
-                  <Text style={styles.validationerror}>{fullnameError}</Text>
+                {fullNameError ? (
+                  <Text style={styles.validationerror}>{fullNameError}</Text>
                 ) : null}
                 <MaterialCommunityIcons
                   name="account-circle-outline"

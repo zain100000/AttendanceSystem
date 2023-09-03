@@ -10,6 +10,8 @@ const ApproveLeaves = () => {
     // Fetch attendance data from Firestore
     const unsubscribe = firestore()
       .collection('approveLeaves')
+      .doc('leaves')
+      .collection('students')      
       .onSnapshot(querySnapshot => {
         const attendance = [];
         querySnapshot.forEach(documentSnapshot => {

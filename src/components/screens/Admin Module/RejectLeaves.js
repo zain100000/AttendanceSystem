@@ -4,12 +4,14 @@ import '../../../../FirebaseConfig';
 import firestore from '@react-native-firebase/firestore';
 
 const RejectLeaves = () => {
-  const [attendanceData, setAttendanceData] = useState([]);
+  const [attendance, setAttendance] = useState([]);
 
   useEffect(() => {
     // Fetch attendance data from Firestore
     const unsubscribe = firestore()
       .collection('rejectLeaves')
+      .doc('leaves')
+      .collection('students')
       .onSnapshot(querySnapshot => {
         const attendance = [];
         querySnapshot.forEach(documentSnapshot => {
@@ -22,7 +24,7 @@ const RejectLeaves = () => {
             timestamp,
           });
         });
-        setAttendanceData(attendance);
+        setAttendance(attendance);
       });
 
     // Unsubscribe when component unmounts
@@ -47,9 +49,9 @@ const RejectLeaves = () => {
 
   return (
     <View style={styles.container}>
-      {attendanceData.length ? (
+      {attendance.length ? (
         <FlatList
-          data={attendanceData}
+          data={attendance}
           keyExtractor={item => item.id}
           renderItem={renderItem}
         />

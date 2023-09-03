@@ -1,43 +1,44 @@
 import React, {useEffect, useState} from 'react';
 import {View, Text, StyleSheet, FlatList} from 'react-native';
 import '../../../../FirebaseConfig';
-import firestore from '@react-native-firebase/firestore'; // Import Firestore
+import firestore from '@react-native-firebase/firestore';
 
 const GradingConfig = {
-  A: 5, // A grade requires 5 or more attendance days
-  B: 4, // B grade requires 4 or more attendance days
-  C: 3, // C grade requires 3 or more attendance days
-  D: 2, // D grade requires 2 or more attendance days
+  A: 0, // A grade requires 0 approved leaves
+  B: 3, // B grade requires more than 3 approved leaves
+  C: 5, // C grade requires more than 5 approved leaves
+  D: 10, // D grade requires more than 10 approved leaves
 };
 
 const Grading = ({route}) => {
-  const {userId} = route.params || {}; // Add a default value to prevent undefined
+  const {userId} = route.params || {};
   const [attendance, setAttendance] = useState([]);
-  const [approveLeaves, setApproveLeaves] = useState(0); // Initialize to 0
+  const [approveLeavesCount, setApproveLeavesCount] = useState(0);
 
   useEffect(() => {
-    // Query the Firebase database for the student's information
     const fetchAttendance = async () => {
+      // Query the Firebase database for the student's attendance
       const attendanceRef = firestore().collection('attendance');
-      const presentQuery = attendanceRef.doc('present').collection('students');
       const leaveQuery = attendanceRef.doc('leave').collection('students');
 
-      const presentSnapshot = await presentQuery.get();
       const leaveSnapshot = await leaveQuery.get();
 
-      const presentData = presentSnapshot.docs.map(doc => doc.data());
       const leaveData = leaveSnapshot.docs.map(doc => doc.data());
 
       // Combine present and leave data if needed
-      const combinedAttendanceData = [...presentData, ...leaveData];
+      const combinedAttendanceData = [...leaveData];
 
       setAttendance(combinedAttendanceData);
 
       // Calculate the number of approved leaves
-      const approvedLeavesRef = firestore().collection('approveLeaves');
-      const approvedLeavesSnapshot = await approvedLeavesRef.get();
+      const approveLeavesRef = firestore()
+        .collection('approveLeaves')
+        .doc('leaves')
+        .collection('students');
+
+      const approvedLeavesSnapshot = await approveLeavesRef.get();
       const approvedLeavesCount = approvedLeavesSnapshot.docs.length;
-      setApproveLeaves(approvedLeavesCount);
+      setApproveLeavesCount(approvedLeavesCount);
     };
 
     fetchAttendance();
@@ -45,17 +46,14 @@ const Grading = ({route}) => {
 
   const calculateGrade = () => {
     if (attendance.length) {
-      if (approveLeaves >= 2) {
+      if (approveLeavesCount > GradingConfig.D) {
         return 'D';
-      } else if (approveLeaves === 0) {
-        return 'A';
+      } else if (approveLeavesCount > GradingConfig.C) {
+        return 'C';
+      } else if (approveLeavesCount > GradingConfig.B) {
+        return 'B';
       } else {
-        // Calculate the grade based on the grading configuration
-        for (const grade in GradingConfig) {
-          if (attendance.length >= GradingConfig[grade]) {
-            return grade;
-          }
-        }
+        return 'A';
       }
     }
     return 'Grade not calculated';
@@ -73,7 +71,7 @@ const Grading = ({route}) => {
                 Student Name: {item.studentName}
               </Text>
               <Text style={styles.attendanceFields}>
-                Leaves: {item.status === 'leave' ? 1 : 0}
+                Number of Leaves: {approveLeavesCount}
               </Text>
               <Text style={styles.attendanceFields}>
                 Grade: {calculateGrade()}
