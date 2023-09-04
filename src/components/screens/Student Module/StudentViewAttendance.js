@@ -57,6 +57,7 @@ const StudentViewAttendance = ({navigation}) => {
           Student Name: {item.studentName}
         </Text>
         <Text style={styles.attendanceFields}>Status: {item.status}</Text>
+        <Text style={styles.attendanceFields}>Roll Number: {item.rollno}</Text>
         {item.timestamp && (
           <Text style={styles.attendanceFields}>
             Timestamp: {new Date(item.timestamp.toDate()).toDateString()}{' '}

@@ -71,6 +71,9 @@ const Grading = ({route}) => {
                 Student Name: {item.studentName}
               </Text>
               <Text style={styles.attendanceFields}>
+                Roll Number: {item.rollno}
+              </Text>
+              <Text style={styles.attendanceFields}>
                 Number of Leaves: {approveLeavesCount}
               </Text>
               <Text style={styles.attendanceFields}>

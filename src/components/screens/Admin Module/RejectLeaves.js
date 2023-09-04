@@ -38,6 +38,7 @@ const RejectLeaves = () => {
           Student Name: {item.studentName}
         </Text>
         <Text style={styles.attendanceFields}>Status: {item.status}</Text>
+        <Text style={styles.attendanceFields}>Roll Number: {item.rollno}</Text>
         <Text style={styles.attendanceFields}>
           {item.timestamp && (
             <Text>{`Timestamp: ${item.timestamp.toString()}`}</Text>

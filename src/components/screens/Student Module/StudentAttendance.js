@@ -16,6 +16,7 @@ const StudentAttendance = ({navigation}) => {
   const [attendance, setAttendance] = useState([]);
   const [currentStudentIndex, setCurrentStudentIndex] = useState(0);
   const [fullName, setFullName] = useState('');
+  const [rollno, setRollNo] = useState('');
 
   useEffect(() => {
     // Fetch the full name of the student from the Firestore collection "users"
@@ -29,6 +30,7 @@ const StudentAttendance = ({navigation}) => {
           if (documentSnapshot.exists) {
             const userData = documentSnapshot.data();
             setFullName(userData.fullName);
+            setRollNo(userData.rollno);
           }
         })
         .catch(error => {
@@ -44,6 +46,7 @@ const StudentAttendance = ({navigation}) => {
     updatedAttendance[currentStudentIndex] = {
       studentName: fullName, // Set the full name
       status: 'Present',
+      rollno: rollno,
       timestamp: timestamp,
     };
 
@@ -58,6 +61,7 @@ const StudentAttendance = ({navigation}) => {
     updatedAttendance[currentStudentIndex] = {
       studentName: fullName, // Set the full name
       status: 'Leave',
+      rollno: rollno,
       timestamp: timestamp,
     };
 
@@ -86,12 +90,14 @@ const StudentAttendance = ({navigation}) => {
         batch.set(presentAttendanceRef, {
           studentName: student.studentName,
           status: student.status,
+          rollno: student.rollno,
           timestamp: student.timestamp,
           userId: user.uid,
         });
         batch.set(presentViewAttendanceRef, {
           studentName: student.studentName,
           status: student.status,
+          rollno: student.rollno,
           timestamp: student.timestamp,
           userId: user.uid,
         });
@@ -108,12 +114,14 @@ const StudentAttendance = ({navigation}) => {
         batch.set(leaveAttendanceRef, {
           studentName: student.studentName,
           status: student.status,
+          rollno: student.rollno,
           timestamp: student.timestamp,
           userId: user.uid,
         });
         batch.set(leaveViewAttendanceRef, {
           studentName: student.studentName,
           status: student.status,
+          rollno: student.rollno,
           timestamp: student.timestamp,
           userId: user.uid,
         });

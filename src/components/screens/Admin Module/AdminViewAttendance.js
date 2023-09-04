@@ -111,6 +111,9 @@ const AdminViewAttendance = ({navigation}) => {
                   Status: {item.status}
                 </Text>
                 <Text style={styles.attendanceFields}>
+                  Roll Number: {item.rollno}
+                </Text>
+                <Text style={styles.attendanceFields}>
                   Timestamp: {item.timestamp.toDate().toLocaleString()}{' '}
                   {/* Convert timestamp to a readable date */}
                 </Text>
