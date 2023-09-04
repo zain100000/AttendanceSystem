@@ -11,12 +11,14 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import '../../../../FirebaseConfig';
 import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const StudentAttendance = ({navigation}) => {
   const [attendance, setAttendance] = useState([]);
   const [currentStudentIndex, setCurrentStudentIndex] = useState(0);
   const [fullName, setFullName] = useState('');
   const [rollno, setRollNo] = useState('');
+  const [attendanceMarkedToday, setAttendanceMarkedToday] = useState(false); // Store if attendance has been marked today
 
   useEffect(() => {
     // Fetch the full name of the student from the Firestore collection "users"
@@ -37,36 +39,74 @@ const StudentAttendance = ({navigation}) => {
           console.error('Error fetching user data:', error);
         });
     }
+
+    // Check if attendance was marked today
+    checkAttendanceMarkedToday();
   }, []);
 
   const markPresent = () => {
-    const updatedAttendance = [...attendance];
-    const timestamp = firestore.FieldValue.serverTimestamp();
+    if (attendanceMarkedToday) {
+      alert(
+        'Attendance Already Marked',
+        'You have already marked your attendance for today.',
+      );
+    } else {
+      const updatedAttendance = [...attendance];
+      const timestamp = firestore.FieldValue.serverTimestamp();
 
-    updatedAttendance[currentStudentIndex] = {
-      studentName: fullName, // Set the full name
-      status: 'Present',
-      rollno: rollno,
-      timestamp: timestamp,
-    };
+      updatedAttendance[currentStudentIndex] = {
+        studentName: fullName, // Set the full name
+        status: 'Present',
+        rollno: rollno,
+        timestamp: timestamp,
+      };
 
-    setAttendance(updatedAttendance);
-    setCurrentStudentIndex(currentStudentIndex + 1);
+      setAttendance(updatedAttendance);
+      setCurrentStudentIndex(currentStudentIndex + 1);
+      setAttendanceMarkedToday(true);
+
+      // Store the date when attendance was marked
+      storeAttendanceMarkedDate();
+    }
   };
 
   const markLeave = () => {
-    const updatedAttendance = [...attendance];
-    const timestamp = firestore.FieldValue.serverTimestamp();
+    if (attendanceMarkedToday) {
+      alert(
+        'Attendance Already Marked',
+        'You have already marked your attendance for today.',
+      );
+    } else {
+      const updatedAttendance = [...attendance];
+      const timestamp = firestore.FieldValue.serverTimestamp();
 
-    updatedAttendance[currentStudentIndex] = {
-      studentName: fullName, // Set the full name
-      status: 'Leave',
-      rollno: rollno,
-      timestamp: timestamp,
-    };
+      updatedAttendance[currentStudentIndex] = {
+        studentName: fullName, // Set the full name
+        status: 'Leave',
+        rollno: rollno,
+        timestamp: timestamp,
+      };
 
-    setAttendance(updatedAttendance);
-    setCurrentStudentIndex(currentStudentIndex + 1);
+      setAttendance(updatedAttendance);
+      setCurrentStudentIndex(currentStudentIndex + 1);
+      setAttendanceMarkedToday(true);
+
+      // Store the date when attendance was marked
+      storeAttendanceMarkedDate();
+    }
+  };
+
+  const checkAttendanceMarkedToday = async () => {
+    const currentDate = new Date().toDateString();
+    const storedDate = await AsyncStorage.getItem('attendanceMarkedDate');
+    if (storedDate === currentDate) {
+      setAttendanceMarkedToday(true);
+    }
+  };
+
+  const storeAttendanceMarkedDate = async () => {
+    const currentDate = new Date().toDateString();
+    await AsyncStorage.setItem('attendanceMarkedDate', currentDate);
   };
 
   const submitAttendance = async () => {

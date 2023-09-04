@@ -43,48 +43,75 @@ const AdminViewAttendance = ({navigation}) => {
         setIsDataFetched(true);
       }
     };
+
+    const fetchEditedStatus = async () => {
+      try {
+        const user = auth().currentUser;
+        if (user) {
+          const editedStatusRef = firestore().collection('editedStatus');
+          const editedStatusData = await editedStatusRef.get();
+
+          const editedStatusMap = {};
+          editedStatusData.docs.forEach(doc => {
+            const data = doc.data();
+            editedStatusMap[doc.id] = data.status;
+          });
+
+          // Update the UI with edited status
+          setAttendance(prevAttendance =>
+            prevAttendance.map(attendanceItem =>
+              editedStatusMap.hasOwnProperty(attendanceItem.id)
+                ? {
+                    ...attendanceItem,
+                    status: editedStatusMap[attendanceItem.id],
+                  }
+                : attendanceItem,
+            ),
+          );
+        }
+      } catch (error) {
+        console.error('Error fetching edited status:', error);
+      }
+    };
+
     if (!isDataFetched) {
       fetchData();
+      fetchEditedStatus(); // Fetch edited status when the component loads
     }
   }, [isDataFetched]);
 
-  const approveLeave = async item => {
+  const toggleStatus = async item => {
     try {
-      // Create a Firestore reference for 'approveLeaves'
-      const approveLeavesRef = firestore().collection('approveLeaves');
+      const newStatus = item.status === 'Present' ? 'Absent' : 'Present';
 
-      // Add the attendanceItem to 'leaves' subcollection
-      const leavesRef = approveLeavesRef.doc('leaves').collection('students');
-      await leavesRef.add(item);
+      // Update Firestore document with the new status
+      const attendanceRef = firestore().collection('attendance');
+      const presentRef = attendanceRef.doc('present').collection('students');
+      const leaveRef = attendanceRef.doc('leave').collection('students');
 
+      if (item.status === 'Present') {
+        await presentRef.doc(item.id).delete(); // Delete from 'present' collection
+        await leaveRef.add({...item, status: newStatus}); // Add to 'leave' collection with updated status
+      } else {
+        await leaveRef.doc(item.id).delete(); // Delete from 'leave' collection
+        await presentRef.add({...item, status: newStatus}); // Add to 'present' collection with updated status
+      }
+
+      // Update the edited status in Firestore
+      await firestore().collection('editedStatus').doc(item.id).set({
+        status: newStatus,
+      });
+
+      // Update the UI with the new status
       setAttendance(prevAttendance =>
-        prevAttendance.filter(attendanceItem => attendanceItem !== item),
+        prevAttendance.map(attendanceItem =>
+          attendanceItem.id === item.id
+            ? {...attendanceItem, status: newStatus}
+            : attendanceItem,
+        ),
       );
-
-      // Set the approvedItem in the state
-      setApproveItem(item);
     } catch (error) {
-      console.error('Error approving leave:', error);
-    }
-  };
-
-  const rejectLeave = async item => {
-    try {
-      // Create a Firestore reference for 'rejectLeaves'
-      const rejectLeavesRef = firestore().collection('rejectLeaves');
-
-      // Add the attendanceItem to 'leaves' subcollection
-      const leavesRef = rejectLeavesRef.doc('leaves').collection('students');
-      await leavesRef.add(item);
-
-      setAttendance(prevAttendance =>
-        prevAttendance.filter(attendanceItem => attendanceItem !== item),
-      );
-
-      // Set the rejectedItem in the state
-      setRejectedItem(item);
-    } catch (error) {
-      console.error('Error rejecting leave:', error);
+      console.error('Error toggling status:', error);
     }
   };
 
@@ -115,10 +142,8 @@ const AdminViewAttendance = ({navigation}) => {
                 </Text>
                 <Text style={styles.attendanceFields}>
                   Timestamp: {item.timestamp.toDate().toLocaleString()}{' '}
-                  {/* Convert timestamp to a readable date */}
                 </Text>
 
-                {/* Conditionally render buttons based on student status */}
                 {item.status === 'Leave' ? (
                   <View style={styles.buttonContainer}>
                     <TouchableOpacity
@@ -132,7 +157,15 @@ const AdminViewAttendance = ({navigation}) => {
                       <Text style={styles.buttonText}>Reject Leave</Text>
                     </TouchableOpacity>
                   </View>
-                ) : null}
+                ) : (
+                  <TouchableOpacity
+                    style={styles.editStatusButton}
+                    onPress={() => toggleStatus(item)}>
+                    <Text style={styles.buttonText}>
+                      {item.status === 'Present' ? 'Set Absent' : 'Set Present'}
+                    </Text>
+                  </TouchableOpacity>
+                )}
               </View>
             )}
           />
@@ -203,6 +236,15 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     paddingVertical: 15,
     paddingHorizontal: 45,
+  },
+
+  editStatusButton: {
+    top: 10,
+    width: '45%',
+    backgroundColor: 'blue',
+    borderRadius: 50,
+    paddingVertical: 20,
+    paddingHorizontal: 30,
   },
 
   buttonText: {
