@@ -11,7 +11,6 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import '../../../../FirebaseConfig';
 import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const StudentAttendance = ({navigation}) => {
   const [attendance, setAttendance] = useState([]);
@@ -41,7 +40,7 @@ const StudentAttendance = ({navigation}) => {
     }
 
     // Check if attendance was marked today
-    checkAttendanceMarkedToday();
+    checkAttendanceMarkedToday(user);
   }, []);
 
   const markPresent = () => {
@@ -65,8 +64,8 @@ const StudentAttendance = ({navigation}) => {
       setCurrentStudentIndex(currentStudentIndex + 1);
       setAttendanceMarkedToday(true);
 
-      // Store the date when attendance was marked
-      storeAttendanceMarkedDate();
+      // Mark attendance as marked for today in Firestore
+      markAttendanceForToday(auth().currentUser);
     }
   };
 
@@ -91,22 +90,38 @@ const StudentAttendance = ({navigation}) => {
       setCurrentStudentIndex(currentStudentIndex + 1);
       setAttendanceMarkedToday(true);
 
-      // Store the date when attendance was marked
-      storeAttendanceMarkedDate();
+      // Mark attendance as marked for today in Firestore
+      markAttendanceForToday(auth().currentUser);
     }
   };
 
-  const checkAttendanceMarkedToday = async () => {
-    const currentDate = new Date().toDateString();
-    const storedDate = await AsyncStorage.getItem('attendanceMarkedDate');
-    if (storedDate === currentDate) {
-      setAttendanceMarkedToday(true);
+  const checkAttendanceMarkedToday = user => {
+    if (!user) {
+      return;
     }
+
+    const currentDate = new Date().toDateString();
+    const attendanceRef = firestore().collection('attendance').doc(user.uid);
+
+    attendanceRef.get().then(docSnapshot => {
+      if (docSnapshot.exists) {
+        const attendanceData = docSnapshot.data();
+        if (attendanceData.markedDate === currentDate) {
+          setAttendanceMarkedToday(true);
+        }
+      }
+    });
   };
 
-  const storeAttendanceMarkedDate = async () => {
+  const markAttendanceForToday = user => {
+    if (!user) {
+      return;
+    }
+
     const currentDate = new Date().toDateString();
-    await AsyncStorage.setItem('attendanceMarkedDate', currentDate);
+    const attendanceRef = firestore().collection('attendance').doc(user.uid);
+
+    attendanceRef.set({markedDate: currentDate}, {merge: true});
   };
 
   const submitAttendance = async () => {
