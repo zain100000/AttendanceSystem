@@ -74,10 +74,10 @@ const Grading = ({route}) => {
                 Roll Number: {item.rollno}
               </Text>
               <Text style={styles.attendanceFields}>
-                Number of Leaves: {approveLeavesCount}
+                Number of Leaves: {approveLeavesCount || 0}
               </Text>
               <Text style={styles.attendanceFields}>
-                Grade: {calculateGrade()}
+                Grade: {approveLeavesCount > 0 ? calculateGrade() : 'A'}
               </Text>
             </View>
           )}
