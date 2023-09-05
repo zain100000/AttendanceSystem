@@ -15,7 +15,7 @@ import Grading from './src/components/screens/Admin Module/Grading';
 
 const Stack = createNativeStackNavigator();
 
-function App() {
+const App = () => {
   return (
     <NavigationContainer>
       <Stack.Navigator screenOptions={{headerShown: false}}>
