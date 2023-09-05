@@ -14,33 +14,37 @@ const AdminViewAttendance = ({navigation}) => {
 
   useEffect(() => {
     const fetchData = async () => {
-      const user = auth().currentUser;
-      if (user) {
-        const attendanceRef = firestore().collection('attendance');
+      try {
+        const user = auth().currentUser;
+        if (user) {
+          const attendanceRef = firestore().collection('attendance');
 
-        // Fetch attendance data for 'Present' status
-        const presentData = await attendanceRef
-          .doc('present')
-          .collection('students')
-          .get();
+          // Fetch attendance data for 'Present' status
+          const presentData = await attendanceRef
+            .doc('present')
+            .collection('students')
+            .get();
 
-        // Fetch attendance data for 'Leave' status
-        const leaveData = await attendanceRef
-          .doc('leave')
-          .collection('students')
-          .get();
+          // Fetch attendance data for 'Leave' status
+          const leaveData = await attendanceRef
+            .doc('leave')
+            .collection('students')
+            .get();
 
-        const presentAttendance = presentData.docs.map(doc => doc.data());
-        const leaveAttendance = leaveData.docs.map(doc => doc.data());
+          const presentAttendance = presentData.docs.map(doc => doc.data());
+          const leaveAttendance = leaveData.docs.map(doc => doc.data());
 
-        // Combine both sets of attendance data
-        const combinedAttendanceData = [
-          ...presentAttendance,
-          ...leaveAttendance,
-        ];
+          // Combine both sets of attendance data
+          const combinedAttendanceData = [
+            ...presentAttendance,
+            ...leaveAttendance,
+          ];
 
-        setAttendance(combinedAttendanceData);
-        setIsDataFetched(true);
+          setAttendance(combinedAttendanceData);
+          setIsDataFetched(true);
+        }
+      } catch (error) {
+        console.error('Error fetching attendance data:', error);
       }
     };
 
@@ -78,7 +82,7 @@ const AdminViewAttendance = ({navigation}) => {
       fetchData();
       fetchEditedStatus(); // Fetch edited status when the component loads
     }
-  }, [isDataFetched]);
+  }, []);
 
   const toggleStatus = async item => {
     try {
@@ -90,11 +94,17 @@ const AdminViewAttendance = ({navigation}) => {
       const leaveRef = attendanceRef.doc('leave').collection('students');
 
       if (item.status === 'Present') {
-        await presentRef.doc(item.id).delete(); // Delete from 'present' collection
-        await leaveRef.add({...item, status: newStatus}); // Add to 'leave' collection with updated status
+        // Delete the current entry from 'present' collection
+        await presentRef.doc(item.id).delete();
+
+        // Add a new entry to 'leave' collection with updated status
+        await leaveRef.add({...item, status: newStatus});
       } else {
-        await leaveRef.doc(item.id).delete(); // Delete from 'leave' collection
-        await presentRef.add({...item, status: newStatus}); // Add to 'present' collection with updated status
+        // Delete the current entry from 'leave' collection
+        await leaveRef.doc(item.id).delete();
+
+        // Add a new entry to 'present' collection with updated status
+        await presentRef.add({...item, status: newStatus});
       }
 
       // Update the edited status in Firestore
