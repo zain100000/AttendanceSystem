@@ -194,6 +194,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'white',
   },
+
   head: {
     flexDirection: 'row',
     backgroundColor: 'green',
@@ -201,6 +202,7 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 50,
     padding: 30,
   },
+  
   heading: {
     flex: 1,
     textAlign: 'center',
@@ -250,7 +252,7 @@ const styles = StyleSheet.create({
 
   editStatusButton: {
     top: 10,
-    width:Dimensions.get('screen').width-200,
+    width:Dimensions.get('screen').width-250,
     backgroundColor: 'blue',
     borderRadius: 50,
     paddingVertical: 20,

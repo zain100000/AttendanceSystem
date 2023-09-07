@@ -67,7 +67,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 4,
     marginVertical: 6,
     width: Dimensions.get('screen').width - 200,
-    height: Dimensions.get('screen').height - 650,
+    height: Dimensions.get('screen').height - 630,
     top: 100,
     left: 10,
     padding: 20,
