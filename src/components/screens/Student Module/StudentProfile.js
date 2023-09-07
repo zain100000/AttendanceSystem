@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   TextInput,
   Text,
+  Dimensions
 } from 'react-native';
 import imgPlaceHolder from '../../../assets/default-Avatar.webp';
 import ImagePicker from 'react-native-image-crop-picker';
@@ -195,7 +196,7 @@ const styles = StyleSheet.create({
   },
 
   profileContainer: {
-    flex: 0.8,
+    flex: 1,
     marginTop: 20,
     alignItems: 'center',
   },
@@ -214,7 +215,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
     padding: 20,
     marginTop: 10,
-    width: '95%',
+    width:Dimensions.get('screen').width-20,
     marginLeft: 10,
   },
 
@@ -230,7 +231,7 @@ const styles = StyleSheet.create({
     borderTopWidth: 0,
     borderLeftWidth: 0,
     borderRightWidth: 0,
-    width: '100%',
+    width:Dimensions.get('screen').width-70,
   },
 
   button: {

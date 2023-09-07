@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import {View, Text, StyleSheet, FlatList, TouchableOpacity} from 'react-native';
+import {View, Text, StyleSheet, FlatList, TouchableOpacity,Dimensions} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import '../../../../FirebaseConfig';
@@ -229,7 +229,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     paddingVertical: 30,
-    width: '100%',
+    width:Dimensions.get('screen').width-200,    
   },
 
   approveButton: {
@@ -237,12 +237,12 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     paddingVertical: 15,
     paddingHorizontal: 45,
-    width: '40%',
+    width:Dimensions.get('screen').width-200,    
   },
 
   rejectButton: {
     backgroundColor: 'red',
-    width: '40%',
+    width:Dimensions.get('screen').width-200,
     borderRadius: 50,
     paddingVertical: 15,
     paddingHorizontal: 45,
@@ -250,7 +250,7 @@ const styles = StyleSheet.create({
 
   editStatusButton: {
     top: 10,
-    width: '45%',
+    width:Dimensions.get('screen').width-200,
     backgroundColor: 'blue',
     borderRadius: 50,
     paddingVertical: 20,

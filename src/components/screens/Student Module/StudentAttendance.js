@@ -5,6 +5,7 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
+  Dimensions
 } from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -260,7 +261,7 @@ const styles = StyleSheet.create({
     padding: 20,
     marginTop: 34,
     borderRadius: 10,
-    width: '95%',
+    width:Dimensions.get('screen').width-20,
     marginLeft: 10,
   },
 

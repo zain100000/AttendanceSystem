@@ -11,6 +11,7 @@ import {
   TextInput,
   TouchableOpacity,
   ActivityIndicator,
+  Dimensions,
 } from 'react-native';
 
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -200,9 +201,7 @@ export default Login;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    marginTop: -10,
     alignItems: 'center',
-    textAlign: 'center',
   },
 
   text: {
@@ -212,19 +211,16 @@ const styles = StyleSheet.create({
 
   image: {
     flex: 1,
-    width: '100%',
+    width: Dimensions.get('screen').width,
     resizeMode: 'cover',
   },
 
   formContainer: {
     backgroundColor: 'transparent',
     padding: 20,
-    marginTop: 160,
-    borderRadius: 10,
-    borderColor: 'black',
-    borderWidth: 5,
-    width: '95%',
-    marginLeft: 10,
+    width: Dimensions.get('screen').width - 20,
+    marginTop: 130,
+    left: 11,
   },
 
   heading: {
@@ -253,7 +249,7 @@ const styles = StyleSheet.create({
     borderTopWidth: 0,
     borderLeftWidth: 0,
     borderRightWidth: 0,
-    width: '100%',
+    width: Dimensions.get('screen').width - 70,
   },
 
   button: {
@@ -261,7 +257,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     alignItems: 'center',
     marginTop: 15,
-    // backgroundColor: COLORS.primary,
+    width: Dimensions.get('screen').width - 65,
   },
 
   buttonText: {

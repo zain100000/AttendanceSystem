@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
+import {View, Text, StyleSheet, TouchableOpacity,Dimensions} from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import '../../../../FirebaseConfig';
 import firebase from '@react-native-firebase/app';
@@ -66,8 +66,8 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
     marginHorizontal: 4,
     marginVertical: 6,
-    width: '50%',
-    height: '50%',
+    width: Dimensions.get('screen').width - 200,
+    height: Dimensions.get('screen').height - 650,
     top: 100,
     left: 10,
     padding: 20,

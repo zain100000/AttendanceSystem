@@ -12,6 +12,7 @@ import {
   TouchableOpacity,
   Image,
   ActivityIndicator,
+  Dimensions,
 } from 'react-native';
 
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -30,7 +31,7 @@ const Signup = ({navigation}) => {
   const [rollno, setRollNo] = useState('');
   const [image, setImage] = useState('');
   const [role, setRole] = useState('');
-  const [showRollNoField, setShowRollNoField] = useState(false); 
+  const [showRollNoField, setShowRollNoField] = useState(false);
   const [hidePassword, setHidePassword] = useState(true);
   const [loading, setLoading] = useState(false);
 
@@ -239,6 +240,7 @@ const Signup = ({navigation}) => {
                 borderRightWidth: 0,
                 marginBottom: 20,
                 marginTop: 20,
+                width: Dimensions.get('screen').width-60,
               }}>
               <Picker
                 selectedValue={role}
@@ -271,7 +273,7 @@ const Signup = ({navigation}) => {
                     placeholder="Roll Number: (Only For Students)!"
                     placeholderTextColor="white"
                     autoCapitalize="none"
-                    keyboardType='phone-pad'
+                    keyboardType="phone-pad"
                     value={rollno}
                     onChangeText={handleRollNoChange}
                   />
@@ -318,9 +320,7 @@ export default Signup;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    marginTop: -35,
     alignItems: 'center',
-    textAlign: 'center',
   },
 
   text: {
@@ -330,19 +330,19 @@ const styles = StyleSheet.create({
 
   imgContainer: {},
 
-  img: {
-    width: 110,
+  img: {    
+    width:110,    
     height: 110,
     top: 16,
     borderRadius: 55,
     borderColor: 'green',
     borderWidth: 4,
-    left: 110,
+    left: 115,
   },
 
   image: {
     flex: 1,
-    width: '100%',
+    width:Dimensions.get('screen').width,
     resizeMode: 'cover',
   },
 
@@ -350,10 +350,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
     padding: 20,
     marginTop: 34,
-    borderRadius: 10,
-    borderColor: 'black',
-    borderWidth: 5,
-    width: '95%',
+    width: Dimensions.get('screen').width,
     marginLeft: 10,
   },
 
@@ -383,7 +380,7 @@ const styles = StyleSheet.create({
     borderTopWidth: 0,
     borderLeftWidth: 0,
     borderRightWidth: 0,
-    width: '100%',
+    width: Dimensions.get('screen').width - 60,
   },
 
   button: {
@@ -392,6 +389,7 @@ const styles = StyleSheet.create({
     top: 20,
     alignItems: 'center',
     marginTop: 15,
+    width: Dimensions.get('screen').width - 60,
   },
 
   buttonText: {
@@ -450,7 +448,7 @@ const styles = StyleSheet.create({
   eyeIconContainer: {
     position: 'absolute',
     top: 20,
-    left: 300,
+    left: 320,
     padding: 5,
   },
 
